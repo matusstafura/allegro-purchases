@@ -1,7 +1,20 @@
+function exportButton(container) {
+    const exportDiv = document.createElement('div');
+    exportDiv.className = 'export';
+    exportDiv.innerHTML = `<button id="export-button">Export to CSV</button>`;
+    container.appendChild(exportDiv);
+}
+
 chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
     const container = document.getElementById('orders-container');
+    if(!ordersArray || ordersArray.length === 0) {
+        container.innerHTML = '<p>No orders found.</p>';
+        return;
+    }
     
     if (ordersArray && ordersArray.length > 0) {
+        exportButton(container);
+
         ordersArray.forEach(order => {
             const orderDiv = document.createElement('div');
             orderDiv.className = 'order';
@@ -28,7 +41,5 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
 
             container.appendChild(orderDiv);
         });
-    } else {
-        container.innerHTML = '<p>No orders found.</p>';
     }
 });
