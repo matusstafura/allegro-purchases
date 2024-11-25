@@ -4,30 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Purchases</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 10px;
-            max-width: 500px;
-        }
-        .order {
-            margin-bottom: 10px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .product {
-            margin-left: 10px;
-        }
-        #orders-container {
-            width: 500px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h3>My Purchases</h3>
+    <div style="display: flex; align-items: center; gap: 10px">
+        <div><h4>Export to:</h4></div>
+        <div><button id="export-csv">CSV</button></div>
+        <div><button id="export-pdf">PDF</button></div>
+    </div>
+    <div class="filter">
+        <div>
+        <label for="date-from">From:</label>
+        <input type="date" id="date-from">
+        </div>
+        <div>
+        <label for="date-to">To:</label>
+        <input type="date" id="date-to">
+        </div>
+        <div>
+            <button id="filter">Filter</button>
+        </div>
+    </div>
     <div id="orders-container"></div>
-    <button id="export-csv">Export Orders to CSV</button>
     <script src="popup.js"></script>
 </body>
 </html>

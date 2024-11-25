@@ -36,7 +36,6 @@ function getOrders() {
 }
 
 const ordersArray = getOrders();
-
 chrome.runtime.sendMessage({ type: 'STORE_ORDERS', ordersArray }, response => {
     if (response && response.status === 'success') {
         console.log("Orders array successfully sent to background.js");

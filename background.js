@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.log("Orders array saved in background.");
             sendResponse({ status: "success" });
         });
-        return true;
+        return true; // Keeps the message channel open for async response
     }
 });
 
