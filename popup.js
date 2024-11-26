@@ -35,12 +35,8 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
             fromDate.setHours(0, 0, 0, 0);
             toDate.setHours(0, 0, 0, 0);
 
-            console.log("From Date: ", fromDate);
-            console.log("To Date: ", toDate);
             const filteredOrders = ordersArray.filter(order => {
                 const orderDate = parsePolishDate(order.date);
-                console.log("Order Date: ", orderDate);
-                console.log("Order Date: ", orderDate >= fromDate && orderDate <= toDate);
                 return orderDate >= fromDate && orderDate <= toDate;
             });
 
@@ -51,18 +47,16 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                 const orderDiv = document.createElement('div');
                 orderDiv.className = 'order';
                 orderDiv.innerHTML = `
-                    <strong>Date:</strong> ${order.date} <br>
-                    <strong>Status:</strong> ${order.status} <br>
-                    <strong>Total Price:</strong> ${order.totalPrice}
+                    <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller} <br>
                     <div class="products">
                         ${order.products.map(product => `
                             <div>
-                                <strong>Product:</strong> ${product.name} <br>
-                                <strong>Qty & Price:</strong> ${product.qtyPrice} <br>
-                                <strong>Product Total:</strong> ${product.total}
+                                ${product.qtyPrice} (${product.total}) - ${product.name}<br> 
+                                <hr/>
                             </div>
                         `).join('')}
                     </div>
+                    <strong>Total Price:</strong> ${order.totalPrice}
                 `;
                 container.appendChild(orderDiv);
             });
@@ -72,8 +66,7 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
             const orderDiv = document.createElement('div');
             orderDiv.className = 'order';
             orderDiv.innerHTML = `
-                <strong>Date:</strong> ${order.date} <br>
-                <strong>Status:</strong> ${order.status} <br>
+                <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller} <br>
                 <strong>Total Price:</strong> ${order.totalPrice}
                 <div class="products">
                     <strong>Products:</strong>
@@ -85,8 +78,8 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                 const productDiv = document.createElement('div');
                 productDiv.className = 'product';
                 productDiv.innerHTML = `
-                    - ${product.name} <br>
                     Quantity & Price: ${product.qtyPrice} <br>
+                    - ${product.name} <br>
                     Total: ${product.total}
                 `;
                 productsContainer.appendChild(productDiv);
@@ -113,11 +106,12 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Exported Orders</title>
+                <link rel="stylesheet" href="./print.css">
                 <style>
                     body {
                         font-family: Arial, sans-serif;
                         margin: 20px;
+                        font-size: 14px;
                     }
                     .order {
                         border: 1px solid #ddd;
@@ -125,29 +119,26 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                         padding: 10px;
                         border-radius: 5px;
                     }
-                    .products {
-                        margin-top: 10px;
-                    }
                     .products div {
-                        margin-left: 15px;
+                        padding: 3px 0px;
                     }
                 </style>
+                <title>Exported Orders</title>
             </head>
             <body>
                 <h1>Filtered Orders</h1>
                 ${filteredOrders.map(order => `
                     <div class="order">
-                        <strong>Date:</strong> ${order.date} <br>
-                        <strong>Status:</strong> ${order.status} <br>
-                        <strong>Total Price:</strong> ${order.totalPrice}
+                        <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller}
                         <div class="products">
-                            <strong>Products:</strong>
                             ${order.products.map(product => `
                                 <div>
-                                    - ${product.name}, Qty & Price: ${product.qtyPrice}, Total: ${product.total}
+                                ${product.qtyPrice} (${product.total}) - ${product.name}<br> 
+                                <hr/>
                                 </div>
                             `).join('')}
                         </div>
+                        <strong>Total Order Price:</strong> ${order.totalPrice}
                     </div>
                 `).join('')}
             </body>
