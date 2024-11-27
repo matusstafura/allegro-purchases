@@ -1,97 +1,84 @@
 chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
     const container = document.getElementById('orders-container');
+    const dateInput = document.getElementById('date');
+    const filterButton = document.getElementById('filter');
+    const exportButton = document.getElementById('export-pdf');
 
-    if(!ordersArray || ordersArray.length === 0) {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    if (!ordersArray || ordersArray.length === 0) {
         container.innerHTML = '<p>No orders found.</p>';
         return;
     }
-    
-    if (ordersArray && ordersArray.length > 0) {
-        const dateFromInput = document.getElementById('date-from');
-        const dateToInput = document.getElementById('date-to');
-        const filterButton = document.getElementById('filter');
-        const container = document.getElementById('orders-container');
 
-        // Polish to English month mapping
-        const monthMap = {
-            'sty': 'Jan', 'lut': 'Feb', 'mar': 'Mar', 'kwi': 'Apr',
-            'maj': 'May', 'cze': 'Jun', 'lip': 'Jul', 'sie': 'Aug',
-            'wrz': 'Sep', 'paź': 'Oct', 'lis': 'Nov', 'gru': 'Dec'
-        };
+    // Polish to English month mapping
+    const monthMap = {
+        'sty': 'Jan', 'lut': 'Feb', 'mar': 'Mar', 'kwi': 'Apr',
+        'maj': 'May', 'cze': 'Jun', 'lip': 'Jul', 'sie': 'Aug',
+        'wrz': 'Sep', 'paź': 'Oct', 'lis': 'Nov', 'gru': 'Dec'
+    };
 
-        // Function to parse Polish date to JavaScript Date
-        function parsePolishDate(dateStr) {
-            const [day, monthPolish, yearTime] = dateStr.split(' ');
-            const monthEnglish = monthMap[monthPolish];
-            const dateEnglishStr = `${day} ${monthEnglish} ${yearTime}`;
-            const date = new Date(dateEnglishStr);
-            date.setHours(0, 0, 0, 0);
-            return date;
+    // Function to parse Polish date to JavaScript Date
+    function parsePolishDate(dateStr) {
+        const [day, monthPolish, yearTime] = dateStr.split(' ');
+        const monthEnglish = monthMap[monthPolish];
+        const dateEnglishStr = `${day} ${monthEnglish} ${yearTime}`;
+        const date = new Date(dateEnglishStr);
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    function displayOrders(filteredOrders) {
+        container.innerHTML = ''; // Clear previous results
+
+        if (filteredOrders.length === 0) {
+            container.innerHTML = '<p>No orders found for the selected date.</p>';
+            return;
         }
 
-        filterButton.addEventListener('click', () => {
-            const fromDate = new Date(dateFromInput.value);
-            const toDate = new Date(dateToInput.value);
-            fromDate.setHours(0, 0, 0, 0);
-            toDate.setHours(0, 0, 0, 0);
-
-            const filteredOrders = ordersArray.filter(order => {
-                const orderDate = parsePolishDate(order.date);
-                return orderDate >= fromDate && orderDate <= toDate;
-            });
-
-            container.innerHTML = ''; // Clear the container for new results
-
-            // Display filtered orders
-            filteredOrders.forEach(order => {
-                const orderDiv = document.createElement('div');
-                orderDiv.className = 'order';
-                orderDiv.innerHTML = `
-                    <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller} <br>
-                    <div class="products">
-                        ${order.products.map(product => `
-                            <div>
-                                ${product.qtyPrice} (${product.total}) - ${product.name}<br> 
-                                <hr/>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <strong>Total Price:</strong> ${order.totalPrice}
-                `;
-                container.appendChild(orderDiv);
-            });
-        });
-
-        ordersArray.forEach(order => {
+        filteredOrders.forEach(order => {
             const orderDiv = document.createElement('div');
             orderDiv.className = 'order';
             orderDiv.innerHTML = `
                 <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller} <br>
-                <strong>Total Price:</strong> ${order.totalPrice}
                 <div class="products">
-                    <strong>Products:</strong>
+                    ${order.products.map(product => `
+                        <div>
+                            ${product.qtyPrice} (${product.total}) - ${product.name}<br>
+                            <hr/>
+                        </div>
+                    `).join('')}
                 </div>
+                <strong>Total Price:</strong> ${order.totalPrice}
             `;
-
-            const productsContainer = orderDiv.querySelector('.products');
-            order.products.forEach(product => {
-                const productDiv = document.createElement('div');
-                productDiv.className = 'product';
-                productDiv.innerHTML = `
-                    Quantity & Price: ${product.qtyPrice} <br>
-                    - ${product.name} <br>
-                    Total: ${product.total}
-                `;
-                productsContainer.appendChild(productDiv);
-            });
-
             container.appendChild(orderDiv);
         });
     }
-    
-    // Function to export filtered data to a new window
-    function exportToPrint(filteredOrders) {
-        // Open a new window
+
+    filterButton.addEventListener('click', () => {
+        const selectedDate = new Date(dateInput.value);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        const filteredOrders = ordersArray.filter(order => {
+            const orderDate = parsePolishDate(order.date);
+            return orderDate.getTime() === selectedDate.getTime();
+        });
+
+        displayOrders(filteredOrders);
+    });
+
+    // Export filtered data to a new window for printing
+    exportButton.addEventListener('click', () => {
+        const selectedDate = new Date(dateInput.value);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        const filteredOrders = ordersArray.filter(order => {
+            const orderDate = parsePolishDate(order.date);
+            return orderDate.getTime() === selectedDate.getTime();
+        });
+
         const printWindow = window.open('', '_blank', 'width=800,height=600');
 
         if (!printWindow) {
@@ -99,14 +86,13 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
             return;
         }
 
-        // Build the HTML content
         const printContent = `
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link rel="stylesheet" href="./print.css">
+                <title>Exported Orders</title>
                 <style>
                     body {
                         font-family: Arial, sans-serif;
@@ -123,55 +109,33 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                         padding: 3px 0px;
                     }
                 </style>
-                <title>Exported Orders</title>
             </head>
             <body>
-                <h1>Filtered Orders</h1>
+                <h1>Filtered Orders for ${selectedDate.toDateString()}</h1>
                 ${filteredOrders.map(order => `
                     <div class="order">
-                        <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller}
+                        <strong>Date:</strong> ${order.date} | <strong>Seller:</strong> ${order.seller} <br>
                         <div class="products">
                             ${order.products.map(product => `
                                 <div>
-                                ${product.qtyPrice} (${product.total}) - ${product.name}<br> 
-                                <hr/>
+                                    ${product.qtyPrice} (${product.total}) - ${product.name}<br>
+                                    <hr/>
                                 </div>
                             `).join('')}
                         </div>
-                        <strong>Total Order Price:</strong> ${order.totalPrice}
+                        <strong>Total Price:</strong> ${order.totalPrice}
                     </div>
                 `).join('')}
             </body>
             </html>
         `;
 
-        // Write to the new window and print
         printWindow.document.open();
         printWindow.document.write(printContent);
         printWindow.document.close();
-
-        // Automatically open print dialog
         printWindow.print();
-    }
-
-    // Add event listener for the Print button
-    document.getElementById('export-pdf').addEventListener('click', () => {
-        // Get the date inputs
-        const fromDate = new Date(document.getElementById('date-from').value);
-        const toDate = new Date(document.getElementById('date-to').value);
-
-        // Ensure time is zeroed
-        fromDate.setHours(0, 0, 0, 0);
-        toDate.setHours(23, 59, 59, 999);
-
-        // Filter orders by date
-        const filteredOrders = ordersArray.filter(order => {
-            const orderDate = parsePolishDate(order.date);
-            return orderDate >= fromDate && orderDate <= toDate;
-        });
-
-        // Export the filtered data to a new window
-        exportToPrint(filteredOrders);
     });
 
+    // Display all orders by default
+    displayOrders(ordersArray);
 });
