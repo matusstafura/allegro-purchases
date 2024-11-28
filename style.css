@@ -5,10 +5,8 @@ body {
     font-size: 14px;
 }
 .order {
-    margin-bottom: 10px;
     padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border-bottom: 1px solid #ccc;
 }
 .product {
     margin-left: 10px;

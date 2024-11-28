@@ -46,8 +46,7 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                 <div class="products">
                     ${order.products.map(product => `
                         <div>
-                            ${product.qtyPrice} (${product.total}) - ${product.name}<br>
-                            <hr/>
+                            - ${product.qtyPrice} (${product.total}) - ${product.name}<br>
                         </div>
                     `).join('')}
                 </div>
@@ -100,10 +99,8 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                         font-size: 14px;
                     }
                     .order {
-                        border: 1px solid #ddd;
-                        margin-bottom: 15px;
                         padding: 10px;
-                        border-radius: 5px;
+                        border-bottom: 1px solid #ddd;
                     }
                     .products div {
                         padding: 3px 0px;
@@ -119,7 +116,6 @@ chrome.storage.local.get('ordersArray', ({ ordersArray }) => {
                             ${order.products.map(product => `
                                 <div>
                                     ${product.qtyPrice} (${product.total}) - ${product.name}<br>
-                                    <hr/>
                                 </div>
                             `).join('')}
                         </div>
